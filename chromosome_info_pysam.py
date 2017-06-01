@@ -80,12 +80,10 @@ def chromosome_counter():
     return reco
 
 def printing(endResult):
-    with open("merge_pcr.txt", "w") as f:
+    with open(args.outfile, "w") as f:
         for entry in endResult:
-            wr = ("%s\t %s\t %s\t %s\t %s\t %s" % (entry[0], entry[1], entry[2], entry[3], c[(entry[1],entry[2])], entry[4]))
-            f.write(wr)
-            f.write('\n')
-            print("%s\t %s\t %s\t %s\t %s\t %s" % (entry[0], entry[1], entry[2], entry[3], c[(entry[1],entry[2])], entry[4]))
+            wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], c[(entry[1],entry[2])], entry[4]))
+            f.write(wr+"\n")
 
 tool_description = """
 Merge PCR duplicates according to random barcode library.
@@ -110,7 +108,7 @@ parser = argparse.ArgumentParser(prog="Chromosomes Information", description=too
                                  epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("bam_file", help="Path to bam file containing alignments.", metavar='BAM File')
 parser.add_argument("fastq_file", help="Path to fastq barcode library.", metavar='FASTQ File')
-parser.add_argument("-o", "--outfile", required=False, help="Write results to this file.",
+parser.add_argument("-o", "--outfile", required=True, help="Write results to this file.",
                     metavar='Output File')
 args = parser.parse_args()
 record = flag_check(args.bam_file)
@@ -118,7 +116,6 @@ fastaq = fastq_read(args.fastq_file)
 
 try:
     endResult = chromosome_counter()
-    printing(endResult)
 
 except:
     if not isfile(args.fastq_file):
@@ -126,4 +123,5 @@ except:
     if not isfile(args.bam_file):
         print("ERROR: bam file '{}' not found.".format(args.fastq_file))
     exit()
+printing(endResult)
 
