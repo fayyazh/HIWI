@@ -19,14 +19,14 @@ def flag_check(bam_file):
         flag_seq = []
         flag = line.flag
         tags = list(line.get_tags())
-        # print(line)
+        print(line)
         if (line.is_unmapped == False and 'XS' not in chain(*tags)):
             if flag == 0:
                 flag_seq.append('+')
             elif line.is_reverse:
                 flag_seq.append('-')
             record.append((line.reference_start,
-                           line.reference_start + line.query_length,
+                           line.reference_start + line.reference_length,
                            line.query_name,
                            flag_seq,
                            sam.get_reference_name(line.reference_id),
@@ -118,12 +118,14 @@ fastaq = fastq_read(args.fastq_file)
 
 try:
     endResult = chromosome_counter()
-    printing(endResult)
+
 
 except:
     if not isfile(args.fastq_file):
         print("ERROR: Fastq'{}' not found.".format(args.fastq_file))
     if not isfile(args.bam_file):
-        print("ERROR: bam file '{}' not found.".format(args.fastq_file))
+        print("ERROR: bam file '{}' not found.".format(args.bam_file))
+    if not isfile(args.out_file):
+        print("ERROR: bam file '{}' not found.".format(args.out_file))
     exit()
-
+printing(endResult)
