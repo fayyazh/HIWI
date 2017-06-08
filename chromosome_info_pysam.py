@@ -8,8 +8,8 @@ record = []
 c = Counter()
 endResult = []
 
-with open("merge_pcr.txt", "w"):
-     pass
+# with open("merge_pcr.txt", "w"):
+#     pass
 
 def flag_check(bam_file):
     record = []
@@ -19,7 +19,7 @@ def flag_check(bam_file):
         flag_seq = []
         flag = line.flag
         tags = list(line.get_tags())
-        print(line)
+        # print(line)
         if (line.is_unmapped == False and 'XS' not in chain(*tags)):
             if flag == 0:
                 flag_seq.append('+')
