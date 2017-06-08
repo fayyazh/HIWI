@@ -83,8 +83,8 @@ def printing(endResult):
     with open(args.outfile, "w") as f:
         for entry in endResult:
             wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], c[(entry[1],entry[2])], entry[4]))
-            f.write(wr)
-            f.write('\n')
+            f.write(wr + '\n')
+            # f.write('\n')
             
 tool_description = """
 Merge PCR duplicates according to random barcode library.
