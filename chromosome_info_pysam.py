@@ -77,6 +77,7 @@ def chromosome_counter():
         else:
             while record[i][2] < fastaq[j][0]:
                 continue
+    reco = sorted(reco, key=lambda x: x[1])
     return reco
 
 def printing(endResult):
@@ -117,6 +118,7 @@ fastaq = fastq_read(args.fastq_file)
 
 try:
     endResult = chromosome_counter()
+    # print(endResult)
 
 
 except:
