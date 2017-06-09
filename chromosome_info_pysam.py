@@ -43,7 +43,6 @@ def fastq_read(fastq_file):
                 b = (str(y)).strip().split()
                 bar_code = (r[(r.index(y)) + 1].strip())
                 fastaq.append((b[0][1:], bar_code))
-
     fastaq = sorted(fastaq, key=lambda x: x[0])
     return fastaq
 
@@ -114,8 +113,6 @@ fastaq = fastq_read(args.fastq_file)
 
 try:
     endResult = chromosome_counter()
-
-
 except:
     if not isfile(args.fastq_file):
         print("ERROR: Fastq'{}' not found.".format(args.fastq_file))
