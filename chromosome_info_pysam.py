@@ -7,9 +7,8 @@ from itertools import chain
 record = []
 c = Counter()
 endResult = []
-
-# with open("merge_pcr.txt", "w"):
-#     pass
+rec = []
+pos = []
 
 def flag_check(bam_file):
     record = []
@@ -48,8 +47,6 @@ def fastq_read(fastq_file):
     fastaq = sorted(fastaq, key=lambda x: x[0])
     return fastaq
 
-rec = []
-pos = []
 def chromosome_count(i,j):
     s_range = (record[i][0], record[i][1])
     c.update([s_range])
@@ -63,7 +60,7 @@ def chromosome_count(i,j):
     return rec, j
 
 def chromosome_counter():
-    j =0
+    j = 0
     reco = []
 
     for i in range(len(record)):
@@ -85,8 +82,7 @@ def printing(endResult):
         for entry in endResult:
             wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], c[(entry[1],entry[2])], entry[4]))
             f.write(wr + '\n')
-            # f.write('\n')
-            
+
 tool_description = """
 Merge PCR duplicates according to random barcode library.
 Barcodes containing uncalled base 'N' are removed.
@@ -118,7 +114,6 @@ fastaq = fastq_read(args.fastq_file)
 
 try:
     endResult = chromosome_counter()
-    # print(endResult)
 
 
 except:
