@@ -10,7 +10,7 @@ score = Counter()
 endResult = []
 merge_data = []
 merge_index = []
-fastq_dic = {}
+fastq_data = {}
 
 def bam_reader(bam_file):
     bam_filter = []
@@ -31,13 +31,14 @@ def bam_reader(bam_file):
     return bam_filter
 
 def fastq_reader(fastq_file):
+    fastq_dt = {}
     for fastq_data in SeqIO.parse(fastq_file, "fastq"):
-        fastq_dic.update({fastq_data.id : fastq_data.seq})
-    return fastq_dic
+        fastq_dt.update({fastq_data.id : fastq_data.seq})
+    return fastq_dt
 
 def chromosome_counter(i):
     # merge_checks contains reference chromosome, ref. start, ref. end and strand.
-    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], fastq_dic[bam_data[i][2]], "".join(bam_data[i][3]))
+    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], fastq_data[bam_data[i][2]], "".join(bam_data[i][3]))
     score.update([merge_checks])
     if(merge_checks not in merge_index):
         merge_data.append((bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][2], ",".join((bam_data[i][3]))))
@@ -48,7 +49,7 @@ def chromosome_info():
     chr_info = []
     for i in range(len(bam_data)):
         rec_id = bam_data[i][2]
-        if rec_id in fastq_dic:
+        if rec_id in fastq_data:
             chr_info = chromosome_counter(i)
         else:
             print(rec_id + " ID not found in fastq file")
@@ -57,7 +58,7 @@ def chromosome_info():
 def printing(endResult):
     with open(args.output_file, "w") as f:
         for entry in endResult:
-            wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], score[(entry[0], entry[1], entry[2], fastq_dic[entry[3]], entry[4])], entry[4]))
+            wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], score[(entry[0], entry[1], entry[2], fastq_data[entry[3]], entry[4])], entry[4]))
             f.write(wr + '\n')
 
 tool_description = """
@@ -86,7 +87,7 @@ parser.add_argument("fastq_file", help="Path to fastq barcode library.", metavar
 parser.add_argument("-o", "--output_file", required=True, help="Write results to this file.",
                     metavar='Output_File')
 args = parser.parse_args()
-fastaq = fastq_reader(args.fastq_file)
+fastq_data = fastq_reader(args.fastq_file)
 bam_data = bam_reader(args.bam_file)
 
 try:
