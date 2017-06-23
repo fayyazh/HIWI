@@ -12,21 +12,34 @@ merge_data = []
 merge_index = []
 fastq_data = {}
 
+def file_check():
+    flag = True
+    if not isfile(args.fastq_file):
+        print("ERROR: Fastq file: '{}' not found.".format(args.fastq_file))
+        flag = False
+    if not isfile(args.bam_file):
+        print("ERROR: bam file: '{}' not found.".format(args.bam_file))
+        flag = False
+    if flag == False:
+        exit()
+
 def bam_reader(bam_file):
     bam_filter = []
     bam = pysam.AlignmentFile(bam_file, "rb")
     data = bam.fetch(multiple_iterators=True, until_eof=True)
 
     for line in data:
+        # print(line)
         if (line.is_unmapped == False and line.has_tag("XS") == False):
             if line.is_reverse:
-                flag = '-'
+                strand = '-'
             else:
-                flag = '+'
+                strand = '+'
             bam_filter.append((line.reference_start,
                            line.reference_start + line.reference_length,
-                           line.query_name, flag,
+                           line.query_name, strand,
                            bam.get_reference_name(line.reference_id)))
+
     bam.close()
     return bam_filter
 
@@ -38,10 +51,10 @@ def fastq_reader(fastq_file):
 
 def chromosome_counter(i):
     # merge_checks contains reference chromosome, ref. start, ref. end and strand.
-    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], fastq_data[bam_data[i][2]], "".join(bam_data[i][3]))
+    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], fastq_data[bam_data[i][2]], bam_data[i][3])
     score.update([merge_checks])
     if(merge_checks not in merge_index):
-        merge_data.append((bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][2], ",".join((bam_data[i][3]))))
+        merge_data.append((bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][2], bam_data[i][3]))
         merge_index.append(merge_checks)
     return merge_data
 
@@ -87,17 +100,10 @@ parser.add_argument("fastq_file", help="Path to fastq barcode library.", metavar
 parser.add_argument("-o", "--output_file", required=True, help="Write results to this file.",
                     metavar='Output_File')
 args = parser.parse_args()
+file_check()
+
 fastq_data = fastq_reader(args.fastq_file)
 bam_data = bam_reader(args.bam_file)
-
-try:
-    endResult = chromosome_info()
-except:
-    if not isfile(args.fastq_file):
-        print("ERROR: Fastq'{}' not found.".format(args.fastq_file))
-    if not isfile(args.bam_file):
-        print("ERROR: bam file '{}' not found.".format(args.bam_file))
-    if not isfile(args.outfile):
-        print("ERROR: bam file '{}' not found.".format(args.output_file))
-    exit()
+endResult = chromosome_info()
 printing(endResult)
+
