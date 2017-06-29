@@ -4,12 +4,10 @@ import argparse
 from os.path import isfile
 from Bio import SeqIO
 
-
 bam_data = []
 score = Counter()
 endResult = []
 merge_data = []
-merge_index = []
 fastq_data = {}
 
 def file_check():
@@ -29,7 +27,6 @@ def bam_reader(bam_file):
     data = bam.fetch(multiple_iterators=True, until_eof=True)
 
     for line in data:
-        # print(line)
         if (line.is_unmapped == False and line.has_tag("XS") == False):
             if line.is_reverse:
                 strand = '-'
@@ -38,24 +35,24 @@ def bam_reader(bam_file):
             bam_filter.append((line.reference_start,
                            line.reference_start + line.reference_length,
                            line.query_name, strand,
-                           bam.get_reference_name(line.reference_id)))
-
+                           bam.get_reference_name(line.reference_id), fastq_data[line.query_name]))
     bam.close()
     return bam_filter
 
 def fastq_reader(fastq_file):
     fastq_dt = {}
+    update_fastq = fastq_dt.update
     for fastq_data in SeqIO.parse(fastq_file, "fastq"):
-        fastq_dt.update({fastq_data.id : fastq_data.seq})
+        update_fastq({fastq_data.id: fastq_data.seq})
     return fastq_dt
 
 def chromosome_counter(i):
     # merge_checks contains reference chromosome, ref. start, ref. end and strand.
-    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], fastq_data[bam_data[i][2]], bam_data[i][3])
+    merge_checks = (bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][5], bam_data[i][3])
     score.update([merge_checks])
-    if(merge_checks not in merge_index):
-        merge_data.append((bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][2], bam_data[i][3]))
-        merge_index.append(merge_checks)
+    append_merge = merge_data.append
+    if score[merge_checks] == 1:
+        append_merge((bam_data[i][4], bam_data[i][0], bam_data[i][1], bam_data[i][2], bam_data[i][3]))
     return merge_data
 
 def chromosome_info():
@@ -71,7 +68,9 @@ def chromosome_info():
 def printing(endResult):
     with open(args.output_file, "w") as f:
         for entry in endResult:
-            wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3], score[(entry[0], entry[1], entry[2], fastq_data[entry[3]], entry[4])], entry[4]))
+            wr = ("%s\t%s\t%s\t%s\t%s\t%s" % (entry[0], entry[1], entry[2], entry[3],
+                                              score[(entry[0], entry[1], entry[2], fastq_data[entry[3]],
+                                                     entry[4])], entry[4]))
             f.write(wr + '\n')
 
 tool_description = """
